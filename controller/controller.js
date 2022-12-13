@@ -37,7 +37,7 @@ const fileupload = async (req, res) => {
           }else{
             res.send({Status:"reject",message:`file rejected 
                         file validations:
-                         name should have only letter`})
+                        we need to have only two columns`})
           }
         })
              console.log(data);
