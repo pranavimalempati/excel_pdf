@@ -14,7 +14,7 @@ const fileupload = async (req, res) => {
             const workbook = new excelJs.Workbook();
            const result = await workbook.xlsx.readFile(req.file.path);
             workbook.eachSheet(function (workSheet) {
-              if(workSheet.columnCount == 2){
+              if(workSheet.columnCount == 2 ){
               workSheet.eachRow(function (row) {
                 if (nameCheckLetters(row.values[1]) && ageCheckNum(row.values[2]) && (row.values[1]!= ''&& row.values[2]!='' || row.values[1]==''&& row.values[2]== '')) {
                 let data1 = {
@@ -67,22 +67,16 @@ const download = async (req, res) => {
     session.startTransaction()
     try {
       const resp =  await record.find().toArray(); 
-      const count = await record.countDocuments();
-      let sum = 0;
-    let arr = [];
+      const count = resp.length
+    let sum = 0;
     for (let index = 0; index < resp.length; index++) {
-      arr.push(parseInt(resp[index].age));
+    sum+= resp[index].age
     }
-    arr.map((res) => {
-      sum += res;
-    });
-
       const avg = sum/count;
       const pdfElement = {
         Count: count,
         averageAge: avg,
       };
-  
       // Create a document
       const doc = new PDFDocument();
       doc.pipe(fs.createWriteStream("./uploads/output.pdf"));
