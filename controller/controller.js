@@ -14,7 +14,7 @@ const fileupload = async (req, res) => {
             const workbook = new excelJs.Workbook();
            const result = await workbook.xlsx.readFile(req.file.path);
             workbook.eachSheet(function (workSheet) {
-              if(workSheet.columnCount <= 2){
+              if(workSheet.columnCount == 2){
               workSheet.eachRow(function (row) {
                 if (nameCheckLetters(row.values[1]) && ageCheckNum(row.values[2]) && (row.values[1]!= ''&& row.values[2]!='' || row.values[1]==''&& row.values[2]== '')) {
                 let data1 = {
