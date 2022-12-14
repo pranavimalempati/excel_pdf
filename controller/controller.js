@@ -15,22 +15,23 @@ const fileupload = async(req,res)=>{
     let temp =[]
     const workbook = new excelJs.Workbook();
      const result = await workbook.xlsx.readFile(req.file.path);
-      const rCount = workbook.worksheets[0].actualRowCount;
+     workbook.eachSheet(function (workSheet) {
+      const rCount = workSheet.actualRowCount;
       // console.log(rCount);
-      const rowcount = workbook.worksheets[0].rowCount;
+      const rowcount = workSheet.rowCount;
       console.log(rowcount);
-      const columnCount = workbook.worksheets[0].columnCount
+      const columnCount = workSheet.columnCount
       // console.log(columnCount)
       if(rCount > 1 && columnCount == 2){
-      let resp = validateHeaders(workbook.worksheets[0].getRow(1).values)
+      let resp = validateHeaders(workSheet.getRow(1).values)
       console.log(resp.status);
       if(resp.status =='ERROR') {
         errormsg.push({location: resp.location, message: resp.message})
        console.log(errormsg)
       }else{
        for(let i = 2;i<=rCount;i++) {
-       const name = workbook.worksheets[0].getRow(i).values[1];
-       const age = workbook.worksheets[0].getRow(i).values[2];
+       const name =workSheet.getRow(i).values[1];
+       const age = workSheet.getRow(i).values[2];
       //  console.log(name)
       //  console.log(age);
        if((name == undefined && age != undefined) || (name!= undefined && age == undefined)){
@@ -62,6 +63,7 @@ const fileupload = async(req,res)=>{
       excel sheet should not be empty`})
       console.log(errormsg)
     }
+  })
     if(errormsg){
       console.log("file rejected")
     }else{
