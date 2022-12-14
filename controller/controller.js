@@ -12,33 +12,41 @@ const fileupload = async(req,res)=>{
     session.startTransaction()
     const data = []
     const errormsg = []
-    let temp =[]
     const workbook = new excelJs.Workbook();
      const result = await workbook.xlsx.readFile(req.file.path);
-     workbook.eachSheet(function (workSheet) {
-      const rCount = workSheet.actualRowCount;
+     const sheetCount = workbook.worksheets.length;
+    console.log("Total Sheets: ", sheetCount);
+    if (sheetCount === 0) {
+      errormsg.push({ message: "Workbook empty." });
+    }else{
+      for (let i = 0; i < sheetCount; i++) {
+
+      const rCount = workbook.worksheets[i].actualRowCount;
       // console.log(rCount);
-      const rowcount = workSheet.rowCount;
+      const rowcount = workbook.worksheets[i].rowCount;
       console.log(rowcount);
-      const columnCount = workSheet.columnCount
-      // console.log(columnCount)
+      const columnCount = workbook.worksheets[i].columnCount
+      //console.log(columnCount)
       if(rCount > 1 && columnCount == 2){
-      let resp = validateHeaders(workSheet.getRow(1).values)
+      let resp = validateHeaders(workbook.worksheets[i].getRow(1).values)
       console.log(resp.status);
       if(resp.status =='ERROR') {
         errormsg.push({location: resp.location, message: resp.message})
        console.log(errormsg)
       }else{
-       for(let i = 2;i<=rCount;i++) {
-       const name =workSheet.getRow(i).values[1];
-       const age = workSheet.getRow(i).values[2];
+       for(let j = 2;j<=rowcount;j++) {
+       const name =workbook.worksheets[i].getRow(j).values[1];
+       const age = workbook.worksheets[i].getRow(j).values[2];
       //  console.log(name)
       //  console.log(age);
        if((name == undefined && age != undefined) || (name!= undefined && age == undefined)){
-        errormsg.push({message:`onefield can not be empty`,location: "Row" + index,})
+        errormsg.push({message:`onefield can not be empty`,location: "Row" + j})
         console.log(errormsg)
         break;
-       }else if(nameCheckLetters(name) && ageCheckNum(age) ){
+       }
+       if(!name && !age) {
+
+      }else if(nameCheckLetters(name) && ageCheckNum(age) ){
         let data1 = {
           Name: name,
           Age: age,
@@ -50,7 +58,7 @@ const fileupload = async(req,res)=>{
                     file validations:
                 name should have only letter,
                 age should contain only number`
-        errormsg.push({message:validatetxt})
+        errormsg.push({message:validatetxt,location: "Row" + j})
         console.log(errormsg)
         break;
        }
@@ -63,8 +71,9 @@ const fileupload = async(req,res)=>{
       excel sheet should not be empty`})
       console.log(errormsg)
     }
-  })
-    if(errormsg){
+  }
+}
+    if(errormsg.length>0){
       console.log("file rejected")
     }else{
     const record = await ages.insertMany(data);
@@ -72,6 +81,8 @@ const fileupload = async(req,res)=>{
         await session.commitTransaction();
         session.endSession();
     }
+
+    
       
   } catch (error) {
     await session.abortTransaction();
@@ -98,6 +109,8 @@ function validateHeaders(headerRow) {
       return {status: 'SUCCESS'}
   }
 }
+
+
 
 // calculating the count & averageage ,downloading that data in pdf format
 const download = async (req, res) => {
@@ -134,5 +147,4 @@ const download = async (req, res) => {
   }
 }
 
-
-module.exports = {fileupload ,download}
+module.exports = {fileupload ,download, upload}
