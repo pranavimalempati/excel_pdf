@@ -4,6 +4,8 @@ const excelJs = require("exceljs");
 const PDFDocument = require("pdfkit");
 const mongoose = require('mongoose');
 const fs = require('fs')
+const axios = require('axios')
+
 
 // inserting the excel data with conditions
 const fileupload = async(req,res)=>{
@@ -78,13 +80,13 @@ const fileupload = async(req,res)=>{
     }else{
     const record = await ages.insertMany(data);
         console.log(record)
-        await session.commitTransaction();
-        session.endSession();
+    let resp = await axios.get("http://localhost:4700/download")
+    res.send(resp.data);   
     }
-
-
-      
-  } catch (error) {
+  
+   await session.commitTransaction();
+   session.endSession();
+      } catch (error) {
     await session.abortTransaction();
      session.endSession();
     res.send(error.message);
@@ -114,8 +116,8 @@ function validateHeaders(headerRow) {
 
 // calculating the count & averageage ,downloading that data in pdf format
 const download = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction()
+  // const session = await mongoose.startSession();
+  // session.startTransaction()
   try {
     const resp =  await ages.find().toArray(); 
     const count = resp.length
@@ -136,13 +138,13 @@ const download = async (req, res) => {
     // Embed a font, set the font size, and render some text
     doc.fontSize(25).text(`totalrecords:${count}, average:${avg}`, 90, 90);
     doc.end();
-    await session.commitTransaction();
-    session.endSession();
-  
+    // await session.commitTransaction();
+    // session.endSession();
+     console.log(pdfElement)
     res.send({pdfElement})
   } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
+      // await session.abortTransaction();
+      // session.endSession();
       res.send(error.message)
   }
 }
