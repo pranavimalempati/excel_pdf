@@ -82,7 +82,7 @@ const fileupload = async(req,res)=>{
         session.endSession();
     }
 
-    
+
       
   } catch (error) {
     await session.abortTransaction();
@@ -147,4 +147,4 @@ const download = async (req, res) => {
   }
 }
 
-module.exports = {fileupload ,download, upload}
+module.exports = {fileupload ,download}
